@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-PulseBoard.AnalyticsService-494e0571-d7a3-4640-aa43-259dee5911ea</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\PulseBoard.Contracts\PulseBoard.Contracts.csproj" />
+  </ItemGroup>
+</Project>

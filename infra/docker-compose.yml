@@ -1,0 +1,78 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: pulse
+      POSTGRES_DB: pulsedb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  webhook-service:
+    build: ./src/services/PulseBoard.WebhookService
+    environment:
+      - RabbitMq__Host=rabbitmq
+    ports:
+      - "5001:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  api-service:
+    build: ./src/services/PulseBoard.ApiService
+    environment:
+      - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__Default=Host=postgres;Database=pulsedb;Password=pulse
+    ports:
+      - "5002:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  analytics-service:
+    build: ./src/services/PulseBoard.AnalyticsService
+    environment:
+      - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__Default=Host=postgres;Database=pulsedb;Password=pulse
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build: ./src/services/PulseBoard.NotificationService
+    environment:
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  pulseboard-ui:
+    build: ./src/frontend/pulseboard-ui
+    ports:
+      - "4200:80"
+
+volumes:
+  postgres_data:

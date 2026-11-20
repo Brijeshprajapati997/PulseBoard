@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/services/">
+    <Project Path="src/services/PulseBoard.AnalyticsService/PulseBoard.AnalyticsService.csproj" />
+    <Project Path="src/services/PulseBoard.ApiService/PulseBoard.ApiService.csproj" />
+    <Project Path="src/services/PulseBoard.NotificationService/PulseBoard.NotificationService.csproj" />
+    <Project Path="src/services/PulseBoard.WebhookService/PulseBoard.WebhookService.csproj" />
+  </Folder>
+  <Folder Name="/src/shared/">
+    <Project Path="src/shared/PulseBoard.Contracts/PulseBoard.Contracts.csproj" />
+  </Folder>
+</Solution>

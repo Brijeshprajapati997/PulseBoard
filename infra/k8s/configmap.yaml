@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulseboard-config
+  namespace: pulseboard
+data:
+  RabbitMq__Host: rabbitmq
+  Db__Name: pulsedb

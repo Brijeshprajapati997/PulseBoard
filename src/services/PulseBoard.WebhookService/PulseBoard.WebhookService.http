@@ -1,0 +1,6 @@
+@PulseBoard.WebhookService_HostAddress = http://localhost:5262
+
+GET {{PulseBoard.WebhookService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
