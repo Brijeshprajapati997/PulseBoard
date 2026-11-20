@@ -1,34 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.MapHealthChecks("/health");
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+app.MapGet("/api/metrics", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    // Week 3: query PostgreSQL via EF Core
+    // Week 5: add SignalR hub for real-time push
+    return Results.Ok(new { message = "metrics endpoint ready", data = Array.Empty<object>() });
 });
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
