@@ -116,7 +116,7 @@ dotnet test PulseBoard.sln
 | 5 | Observability (Prometheus, Grafana, Jaeger) | 🔲 Upcoming |
 | 6 | Security (JWT, NetworkPolicy, secrets) | 🔲 Upcoming |
 
-> Full step-by-step guide: [PulseBoard Build Guide](https://claude.ai/artifact/EnfKBNzmQJivTq8pXfLqDn)
+> Full step-by-step guide: [PulseBoard Build Guide](PulseBoard-6-Week-Cloud-Native-Build-Guide.md)
 
 ---
 
@@ -143,6 +143,63 @@ Background Worker that consumes events from RabbitMQ and sends Slack alerts when
 | `RabbitMq__Host` | All services | RabbitMQ hostname |
 | `ConnectionStrings__Default` | ApiService, AnalyticsService | PostgreSQL connection string |
 | `Slack__WebhookUrl` | NotificationService | Slack incoming webhook URL |
+
+---
+
+## Organization-wide Metrics
+
+By default PulseBoard tracks your personal repos. To track an **entire GitHub organization**:
+
+### Personal account vs Organization
+
+| | Personal | Organization |
+|--|---------|-------------|
+| Webhook scope | Your repos only | All repos in the org |
+| GitHub token | Personal Access Token | GitHub App installation token |
+| New repos | Must add webhook manually | Covered automatically |
+
+### How to enable org-wide tracking
+
+**Step 1 — Register a GitHub App** (Week 6)
+Go to GitHub → Settings → Developer Settings → GitHub Apps → New GitHub App. Grant it `Webhooks (read)`, `Pull requests (read)`, `Contents (read)` on the org.
+
+**Step 2 — Install the app on your org**
+Install it on the target organization. GitHub issues an installation token that the WebhookService uses to call the API on behalf of the org.
+
+**Step 3 — Add an org-level webhook**
+Go to your GitHub Org → Settings → Webhooks → Add webhook.
+```
+Payload URL : https://<your-domain>/webhooks/github
+Content type: application/json
+Events      : Pull requests, Pushes, Issues
+```
+One webhook covers every repo in the org, including new ones added later.
+
+**Step 4 — Filter by org in the dashboard**
+Every event contract already carries `OrgName` (populated from `organization.login` in the webhook payload). The API supports `GET /api/metrics?org=your-org-name` and the Angular UI has an org selector dropdown.
+
+### Event contracts with OrgName
+
+```csharp
+// PulseBoard.Contracts/Events/Events.cs
+public record PullRequestEvent(
+    string OrgName,   // e.g. "dyad-tech" — empty string for personal repos
+    string RepoName,
+    string Action,
+    string Author,
+    int Number,
+    DateTimeOffset OccurredAt
+);
+```
+
+### Environment variables for org mode
+
+| Variable | Service | Description |
+|----------|---------|-------------|
+| `GitHub__AppId` | WebhookService | GitHub App ID |
+| `GitHub__PrivateKeyPath` | WebhookService | Path to the App's .pem key |
+| `GitHub__InstallationId` | WebhookService | Installation ID for the target org |
+| `GitHub__WebhookSecret` | WebhookService | Webhook secret for signature validation |
 
 ---
 
